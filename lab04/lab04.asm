@@ -6,20 +6,48 @@
         .globl main # declare the label main as global. 
         
         .text 
-mult:
-        # ---------------------------------------------------------------------
-        # Write your mult subroutine here. Follow standard MIPS conventions
-        #  on register use.
-        # ---------------------------------------------------------------------
-        jr    $ra # return
+mult1:
+        lw    $t0,0($a0)      #-----------------------------------------------------------------
+        add   $t1,$zero,$zero # i use mult1 like an app in order to
+        add   $s4,$zero,$zero # do calcultions and not like a subroutine
+mult2:                         # because i didn't find it useful
+		beq  $t1,$t0,exitmult # ---------------------------------------------------------------------
+		add  $s4,$s4,$v0
+		addi $t1,$t1,1
+		j     mult2 	
+exitmult:
+		add   $v0,$zero,$s4
+		addi  $sp,$sp,4
+        j     exitlistProd
+
+
+
+
+
 
 
 listProd:
-        # ---------------------------------------------------------------------
-        # Write your listProd subroutine here. Follow standard MIPS conventions
-        #  on register use.
-        # ---------------------------------------------------------------------
+        addi  $sp,$sp,-8
+        sw    $ra,4($sp)
+        bne   $a0,$zero,again #if a0 !=0 goto again
+		addi  $v0,$zero,1	  # if a0 == 0 v0=1
+		j     exitlistProd
+again:
+		sw    $a0,0($sp) # i save the address of the 1st item then of the 2nd etc.
+		addi  $a0,$a0,4  
+		lw    $a0,0($a0) # goes to the next item
+		jal   listProd	 # again in listProd
+		lw    $a0,4($sp) # when it finishes with the listProd v0=1 and here i get the address from the last item and then from last-1 etc.
+		j     mult1		# goes to mult1 above
+exitlistProd:
+        lw    $ra,4($sp)
+        addi  $sp,$sp,4
         jr    $ra
+        
+        
+       # what i did is this (((((1*5)*4)*3)*2)*1)
+       # because the code in java you give us in the pdf lab04 does that
+       # may you wanted it different but i thought that this is the right way 
 
 
         ########################################################################
@@ -44,7 +72,7 @@ main:
         la    $a0, na_d
         jal   listProd
         addu  $s3, $v0, $zero   # Move the result to s3 for tester to check
-
+		addi  $sp,$sp,16
         addiu      $v0, $zero, 10    # system service 10 is exit
         syscall                      # we are outta here.
 
